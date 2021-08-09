@@ -14,7 +14,7 @@ from tensorflow.keras.models import load_model
 from sklearn.metrics import classification_report, confusion_matrix
 import random
 
-data_info = pd.read_csv('lending_club_info.csv', index_col='LoanStatNew')
+data_info = pd.read_csv('Data/lending_club_info.csv', index_col='LoanStatNew')
 
 
 @st.cache
@@ -24,7 +24,7 @@ def feat_info(col_name):
 
 @st.cache(allow_output_mutation=True)
 def get_data():
-    return pd.read_csv('lending_club_loan_two.csv')
+    return pd.read_csv('Data/lending_club_loan_two.csv')
 
 
 df = get_data()
@@ -245,11 +245,13 @@ st.markdown("""This still doesn't really inform us if there is a strong
  is the percentage of charge offs per category. Essentially informing us what
  percentage of people per employment category didn't pay back their loan.""")
 
-emp_co = df[df['loan_status'] == "Charged Off"].groupby("emp_length").count()['loan_status']
+emp_co = df[df['loan_status'] == "Charged Off"].groupby("emp_length").count()[
+    'loan_status']
 
-emp_fp = df[df['loan_status'] == "Fully Paid"].groupby("emp_length").count()['loan_status']
+emp_fp = df[df['loan_status'] == "Fully Paid"].groupby("emp_length").count()[
+    'loan_status']
 
-emp_len = emp_co/emp_fp
+emp_len = emp_co / emp_fp
 
 st.text(emp_len)
 
@@ -314,7 +316,8 @@ def fill_mort_acc(total_acc, mort_acc):
     Checks if the mort_acc is NaN , if so, it returns the avg mort_acc value
     for the corresponding total_acc value for that row.
 
-    total_acc_avg here should be a Series or dictionary containing the mapping of the
+    total_acc_avg here should be a Series or dictionary containing the mapping
+     of the
     groupby averages of mort_acc per total_acc values.
     '''
     if np.isnan(mort_acc):
@@ -323,7 +326,8 @@ def fill_mort_acc(total_acc, mort_acc):
         return mort_acc
 
 
-df['mort_acc'] = df.apply(lambda x: fill_mort_acc(x['total_acc'], x['mort_acc']), axis=1)
+df['mort_acc'] = df.apply(lambda x: fill_mort_acc(
+    x['total_acc'], x['mort_acc']), axis=1)
 
 st.text(df.isnull().sum())
 
@@ -365,12 +369,16 @@ subgrade_dummies = pd.get_dummies(df['sub_grade'], drop_first=True)
 df = pd.concat([df.drop('sub_grade', axis=1), subgrade_dummies], axis=1)
 st.text(df.columns)
 
-st.subheader("""verification_status, application_type,initial_list_status,purpose features""")
+st.subheader(
+    """verification_status, application_type,initial_list_status,purpose
+     features""")
 st.markdown("""We will convert these columns into dummy variables and
  concatenate them with the original dataframe.""")
 
-dummies = pd.get_dummies(df[['verification_status', 'application_type', 'initial_list_status', 'purpose']], drop_first=True)
-df = df.drop(['verification_status', 'application_type', 'initial_list_status', 'purpose'], axis=1)
+dummies = pd.get_dummies(df[['verification_status', 'application_type',
+                         'initial_list_status', 'purpose']], drop_first=True)
+df = df.drop(['verification_status', 'application_type',
+             'initial_list_status', 'purpose'], axis=1)
 df = pd.concat([df, dummies], axis=1)
 
 st.subheader('home_ownership feature')
@@ -408,7 +416,8 @@ st.markdown("""This appears to be a historical timestamp. We will extract the
 year from the column and set it to a new column.
  """)
 
-df['earliest_cr_year'] = df['earliest_cr_line'].apply(lambda date: int(date[-4:]))
+df['earliest_cr_year'] = df['earliest_cr_line'].apply(
+    lambda date: int(date[-4:]))
 df = df.drop('earliest_cr_line', axis=1)
 
 st.text(df.select_dtypes(['object']).columns)
@@ -423,7 +432,8 @@ X = df.drop('loan_repaid', axis=1).values
 y = df['loan_repaid'].values
 st.markdown("Perform a train_test_split")
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=101)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=101)
 
 st.subheader("Normalizing the Data")
 
@@ -453,7 +463,7 @@ model.add(Dense(19, activation='relu'))
 model.add(Dropout(0.2))
 
 # output layer
-model.add(Dense(units=1,activation='sigmoid'))
+model.add(Dense(units=1, activation='sigmoid'))
 
 # Compile model
 model.compile(loss='binary_crossentropy', optimizer='adam')
